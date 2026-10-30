@@ -11,7 +11,9 @@ mac:
   category: public.app-category.card-games
   target:
     - target: dmg
+    - target: zip
   identity: null
+  artifactName: Skip-Bo-${version}-mac-${arch}.${ext}
 dmg:
   title: Skip-Bo
 win:
@@ -19,5 +21,8 @@ win:
     - nsis
     - portable
 nsis:
+  artifactName: Skip-Bo-Setup-${version}.${ext}
   oneClick: false
   allowToChangeInstallationDirectory: true
+portable:
+  artifactName: Skip-Bo-${version}-windows-portable.${ext}

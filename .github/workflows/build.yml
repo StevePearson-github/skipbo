@@ -22,4 +22,28 @@ jobs:
       - run: npx playwright test tests/e2e/game.spec.ts
       - run: npx electron-builder --win
       - uses: actions/upload-artifact@v4
-        with: { name: skipbo-windows, path: dist/*.exe }
+        with:
+          name: skipbo-windows-installer
+          path: dist/Skip-Bo-Setup-*.exe
+      - uses: actions/upload-artifact@v4
+        with:
+          name: skipbo-windows-portable
+          path: dist/Skip-Bo-*-windows-portable.exe
+  mac:
+    runs-on: macos-latest
+    needs: test
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with: { node-version: 24 }
+      - run: npm ci
+      - run: npm run build
+      - run: npx electron-builder --mac --universal
+      - uses: actions/upload-artifact@v4
+        with:
+          name: skipbo-mac-dmg
+          path: dist/*.dmg
+      - uses: actions/upload-artifact@v4
+        with:
+          name: skipbo-mac-standalone-zip
+          path: dist/*.zip
