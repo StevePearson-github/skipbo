@@ -42,6 +42,8 @@ function createWindow(): void {
       sandbox: true,
       nodeIntegration: false,
       autoplayPolicy: 'no-user-gesture-required',
+      // keep animations and computer turns running even when the window is hidden or occluded
+      backgroundThrottling: false,
     },
   })
   win.once('ready-to-show', () => {
