@@ -13,8 +13,8 @@
     "test": "vitest run",
     "test:sim": "vitest run tests/sim",
     "test:e2e": "npm run build && playwright test",
-    "dist:mac": "npm run build && electron-builder --mac --universal",
-    "dist:win": "npm run build && electron-builder --win"
+    "dist:mac": "npm run build && electron-builder --mac --universal --publish never",
+    "dist:win": "npm run build && electron-builder --win --publish never"
   },
   "devDependencies": {
     "@playwright/test": "1.64",

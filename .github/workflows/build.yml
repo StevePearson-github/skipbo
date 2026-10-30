@@ -20,7 +20,7 @@ jobs:
       - run: npm ci
       - run: npm run build
       - run: npx playwright test tests/e2e/game.spec.ts
-      - run: npx electron-builder --win
+      - run: npx electron-builder --win --publish never
       - uses: actions/upload-artifact@v4
         with:
           name: skipbo-windows-installer
@@ -38,7 +38,7 @@ jobs:
         with: { node-version: 24 }
       - run: npm ci
       - run: npm run build
-      - run: npx electron-builder --mac --universal
+      - run: npx electron-builder --mac --universal --publish never
       - uses: actions/upload-artifact@v4
         with:
           name: skipbo-mac-dmg
