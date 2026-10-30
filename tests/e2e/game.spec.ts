@@ -224,7 +224,15 @@ test('at normal speed, animated computer turns complete and hand control back to
     }
     await page.click('.tray-hand [data-hand="0"]')
     await page.click(`.tray-left [data-discard="${round}"]`)
-    await page.waitForFunction(() => window.__skipbo!.game()!.state.current !== 0 || window.__skipbo!.game()!.state.winner !== null)
+    await page
+      .waitForFunction(() => window.__skipbo!.game()!.state.current !== 0 || window.__skipbo!.game()!.state.winner !== null, undefined, { timeout: 20000 })
+      .catch(async (e) => {
+        const dbg = await page.evaluate(() => {
+          const g = window.__skipbo!.game()!
+          return JSON.stringify({ round: g.round, busy: g.busy, selected: g.selected, cur: g.state.current, hand: g.state.players[0]!.hand, build: g.state.build, errors: document.querySelectorAll('.shake').length, fly: document.querySelectorAll('.fly').length })
+        })
+        throw new Error(`stuck in round ${round}: ${dbg}\n${e}`)
+      })
     if (round === 1) await page.screenshot({ path: 'screenshots/midgame.png' })
   }
   await expect(page.locator('.fly')).toHaveCount(0, { timeout: 30000 })
