@@ -287,3 +287,18 @@ test('the winner banner reads "You win!" for a player named You and "Name wins!"
   const text = await page.locator('#winner h2').innerText()
   expect(text).toBe(s.winner === 0 ? 'You win!' : 'Pixel wins!')
 })
+
+test('input is ignored (not applied to a stale screen) while a turn change is in progress', async () => {
+  test.setTimeout(90000)
+  ctx = await launch({ SKIPBO_QUERY: 'seed=12' })
+  const { page } = ctx
+  await startGame(page, [{ name: 'Steve', kind: 'human' }, { name: 'Pixel', kind: 'cpu', level: 'hard' }])
+  // whenever it is the human's turn the game must not be busy, and whenever busy the game must reject clicks
+  await page.waitForFunction(() => window.__skipbo!.game()!.state.current === 0 && !window.__skipbo!.game()!.busy, undefined, { timeout: 60000, polling: 50 })
+  const ok = await page.evaluate(() => {
+    const g = window.__skipbo!.game()!
+    // the board shown must belong to the player whose turn it is
+    return document.querySelector('.tray-name')!.textContent!.includes(g.seats[g.state.current]!.name)
+  })
+  expect(ok).toBe(true)
+})

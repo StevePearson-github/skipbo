@@ -160,12 +160,15 @@ export class GameController {
       if (a.src === 'hand' && player.hand.length === 1 && next.players[prev]!.hand.length > 0) setTimeout(() => snd.play('draw'), 200)
     } else if (a.type === 'discard') snd.play('discard')
     this.render()
-    this.busy = false
+    const turnChanged = next.winner === null && next.current !== prev
+    // stay locked across a turn change until beginTurn has redrawn the board for the next player,
+    // otherwise a fast click lands on the stale screen and is wiped by the redraw
+    if (!turnChanged) this.busy = false
     if (next.winner !== null) {
       await this.win()
       return 'win'
     }
-    if (next.current !== prev) {
+    if (turnChanged) {
       snd.play('turnChange')
       await this.wait(250)
       void this.beginTurn()
