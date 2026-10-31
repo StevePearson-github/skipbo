@@ -2,6 +2,14 @@
 
 A cartoony desktop Skip-Bo for macOS and Windows (Electron + TypeScript). 2-6 players on one shared screen, any mix of humans and computer players (Easy / Medium / Hard). All art is SVG generated in code and all sound and music is synthesized with Web Audio.
 
+![Skip-Bo gameplay: a 3-player game with a wild card on a building pile](docs/screenshot-game.png)
+
+<details><summary>Setup screen</summary>
+
+![Skip-Bo setup screen](docs/screenshot-menu.png)
+
+</details>
+
 > **Unofficial fan project.** This is an independent, non-commercial recreation of a classic card game. It is not affiliated with, endorsed by, or sponsored by Mattel, Inc. "Skip-Bo" is a trademark of Mattel, Inc. and is used here only to name the game being recreated. All artwork and sound in this repository are original and generated in code; no Mattel artwork or assets are used.
 
 ## Install
