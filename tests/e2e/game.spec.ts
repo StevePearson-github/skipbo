@@ -211,7 +211,7 @@ test('at normal speed, animated computer turns complete and hand control back to
   ctx = await launch({ SKIPBO_QUERY: 'seed=12' })
   const { page } = ctx
   await startGame(page, [{ name: 'Steve', kind: 'human' }, { name: 'Pixel', kind: 'cpu', level: 'hard' }, { name: 'Bolt', kind: 'cpu', level: 'medium' }])
-  const humanTurn = () => page.waitForFunction(() => window.__skipbo!.game()!.state.current === 0 && !window.__skipbo!.game()!.busy, undefined, { timeout: 60000 })
+  const humanTurn = () => page.waitForFunction(() => window.__skipbo!.game()!.state.current === 0 && !window.__skipbo!.game()!.busy, undefined, { timeout: 60000, polling: 100 })
   for (let round = 0; round < 3; round++) {
     await humanTurn()
     const s = await getState(page)
@@ -226,11 +226,13 @@ test('at normal speed, animated computer turns complete and hand control back to
       await page.click(`[data-build="${p}"]`)
       await page.waitForFunction(() => !window.__skipbo!.game()!.busy && window.__skipbo!.game()!.selected === null)
     }
+    const turnCountBefore = s.turnCount
     await page.click('.tray-hand [data-hand="0"]')
     const selectedAfterFirstClick = await page.locator('.tray-hand .sel').count()
     await page.click(`.tray-left [data-discard="${round}"]`)
     await page
-      .waitForFunction(() => window.__skipbo!.game()!.state.current !== 0 || window.__skipbo!.game()!.state.winner !== null, undefined, { timeout: 20000 })
+      // turnCount only ever increases, so this cannot be missed even if the computers finish quickly
+      .waitForFunction((n) => window.__skipbo!.game()!.state.turnCount > n, turnCountBefore, { timeout: 20000, polling: 100 })
       .catch(async (e) => {
         const dbg = await page.evaluate(() => {
           const g = window.__skipbo!.game()!
