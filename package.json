@@ -4,7 +4,7 @@
   "description": "Skip-Bo card game for Mac and Windows",
   "main": "./out/main/index.js",
   "author": "Steve",
-  "license": "UNLICENSED",
+  "license": "MIT",
   "private": true,
   "scripts": {
     "dev": "electron-vite dev",

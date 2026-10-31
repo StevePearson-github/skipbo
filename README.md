@@ -2,6 +2,8 @@
 
 A cartoony desktop Skip-Bo for macOS and Windows (Electron + TypeScript). 2-6 players on one shared screen, any mix of humans and computer players (Easy / Medium / Hard). All art is SVG generated in code and all sound and music is synthesized with Web Audio.
 
+> **Unofficial fan project.** This is an independent, non-commercial recreation of a classic card game. It is not affiliated with, endorsed by, or sponsored by Mattel, Inc. "Skip-Bo" is a trademark of Mattel, Inc. and is used here only to name the game being recreated. All artwork and sound in this repository are original and generated in code; no Mattel artwork or assets are used.
+
 ## Install
 Download the latest build from the [Releases page](https://github.com/StevePearson-github/skipbo/releases/latest).
 
@@ -38,3 +40,6 @@ Options: stock size (10-30), match target, pass-the-device screen between human 
 
 ## Layout
 `src/shared/engine` rules, `src/shared/ai` computer players, `src/renderer` UI and audio, `src/main` Electron shell, `tests/` unit, simulation and e2e tests. Research is in `reports/`.
+
+## License
+The code is released under the [MIT License](LICENSE). Third-party components keep their own licenses: Electron (MIT), GSAP (the [GSAP standard license](https://gsap.com/standard-license/)) and the Fredoka font (SIL Open Font License 1.1).

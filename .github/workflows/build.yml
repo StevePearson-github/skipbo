@@ -76,6 +76,8 @@ jobs:
           - **Windows installer:** `Skip-Bo-Setup-*.exe`
           - **macOS:** `Skip-Bo-*-mac-universal.dmg` (Apple Silicon and Intel), or the `.zip` for a stand-alone app
 
+          Unofficial fan project, not affiliated with Mattel, Inc. "Skip-Bo" is a trademark of Mattel, Inc.
+
           ## First launch
           These builds are not code-signed.
           - **Windows:** if SmartScreen says "Windows protected your PC", click **More info**, then **Run anyway**.
