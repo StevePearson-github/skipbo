@@ -2,8 +2,28 @@
 
 A cartoony desktop Skip-Bo for macOS and Windows (Electron + TypeScript). 2-6 players on one shared screen, any mix of humans and computer players (Easy / Medium / Hard). All art is SVG generated in code and all sound and music is synthesized with Web Audio.
 
+## Install
+Download the latest build from the [Releases page](https://github.com/StevePearson-github/skipbo/releases/latest).
+
+**Windows**
+- *Stand-alone, no install:* download `Skip-Bo-<version>-windows-portable.exe` and double-click it.
+- *Installer:* download `Skip-Bo-Setup-<version>.exe`, run it, and pick an install folder (no admin rights needed).
+
+**macOS** (Apple Silicon and Intel)
+- *Installer:* open `Skip-Bo-<version>-mac-universal.dmg` and drag Skip-Bo to Applications.
+- *Stand-alone:* unzip `Skip-Bo-<version>-mac-universal.zip` and run the app from anywhere.
+
+The builds are not code-signed, so your OS will warn you the first time:
+- **Windows:** if SmartScreen says "Windows protected your PC", click **More info**, then **Run anyway**.
+- **macOS:** right-click the app and choose **Open**, then confirm. If it is still blocked, run `xattr -dr com.apple.quarantine /Applications/Skip-Bo.app` in Terminal.
+
+Settings (names, options, volume) are saved per user: `%APPDATA%\Skip-Bo` on Windows, `~/Library/Application Support/Skip-Bo` on macOS.
+
+## Build from source
+Requires Node 22+ (developed on Node 24).
+
 ## Commands
-- `npm run dev` run in development
+- `npm install`, then `npm run dev` to run in development
 - `npm test` unit, AI, audio and simulation tests (Vitest). `SIM_GAMES=2000 npm test` for a longer simulation
 - `npm run test:e2e` build and run the Electron end-to-end tests (Playwright)
 - `npm run dist:mac` universal DMG into `dist/` (unsigned)
