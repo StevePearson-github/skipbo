@@ -216,11 +216,15 @@ test('at normal speed, animated computer turns complete and hand control back to
     await humanTurn()
     const s = await getState(page)
     const hand: number[] = s.players[0].hand
-    const playable = hand.findIndex((c) => c === 1 || c === 0)
-    if (playable >= 0) {
-      await page.click(`.tray-hand [data-hand="${playable}"]`)
-      await page.click('[data-build="0"]')
-      await page.waitForFunction(() => !window.__skipbo!.game()!.busy)
+    const builds: number[][] = s.build
+    // pick a genuinely legal (card, pile) pair: computers may already have started piles
+    let pair: [number, number] | null = null
+    hand.forEach((c, i) => builds.forEach((b, p) => { if (!pair && (c === 0 || c === b.length + 1)) pair = [i, p] }))
+    if (pair) {
+      const [i, p] = pair as [number, number]
+      await page.click(`.tray-hand [data-hand="${i}"]`)
+      await page.click(`[data-build="${p}"]`)
+      await page.waitForFunction(() => !window.__skipbo!.game()!.busy && window.__skipbo!.game()!.selected === null)
     }
     await page.click('.tray-hand [data-hand="0"]')
     await page.click(`.tray-left [data-discard="${round}"]`)
