@@ -52,3 +52,33 @@ jobs:
         with:
           name: skipbo-mac-standalone-zip
           path: dist/*.zip
+  release:
+    if: startsWith(github.ref, 'refs/tags/v')
+    needs: [windows, mac]
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+    steps:
+      - uses: actions/download-artifact@v4
+        with:
+          path: artifacts
+          merge-multiple: true
+      - run: ls -la artifacts
+      - name: Create GitHub release
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          cat > notes.md <<'NOTES'
+          Cartoony Skip-Bo for Windows and macOS: 2-6 players on one screen, human or computer (Easy / Medium / Hard), synthesized sound and music.
+
+          ## Downloads
+          - **Windows, stand-alone (no install):** `Skip-Bo-*-windows-portable.exe`. Just double-click it.
+          - **Windows installer:** `Skip-Bo-Setup-*.exe`
+          - **macOS:** `Skip-Bo-*-mac-universal.dmg` (Apple Silicon and Intel), or the `.zip` for a stand-alone app
+
+          ## First launch
+          These builds are not code-signed.
+          - **Windows:** if SmartScreen says "Windows protected your PC", click **More info**, then **Run anyway**.
+          - **macOS:** right-click the app and choose **Open** the first time.
+          NOTES
+          gh release create "$GITHUB_REF_NAME" artifacts/* --repo "$GITHUB_REPOSITORY" --title "Skip-Bo $GITHUB_REF_NAME" --notes-file notes.md
