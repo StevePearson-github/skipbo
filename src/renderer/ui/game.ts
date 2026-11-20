@@ -256,14 +256,12 @@ export class GameController {
     } else if (disc && disc.closest('.tray-left')) {
       const pile = Number(disc.dataset.discard)
       const sel = this.selected
+      if ((!sel || this.same({ src: 'discard', pile })) && me.discards[pile]!.length && this.isDoubleTap(`discard:${pile}`) && this.autoPlay({ src: 'discard', pile }, disc)) return
       if (sel && sel.src === 'hand') void this.perform({ type: 'discard', index: sel.index, pile })
       else if (sel) {
         if (this.same({ src: 'discard', pile })) this.select(null)
         else this.invalid(disc)
-      } else if (me.discards[pile]!.length) {
-        if (this.isDoubleTap(`discard:${pile}`) && this.autoPlay({ src: 'discard', pile }, disc)) return
-        this.select({ src: 'discard', pile })
-      }
+      } else if (me.discards[pile]!.length) this.select({ src: 'discard', pile })
     } else if (build) {
       const to = Number(build.dataset.build)
       const sel = this.selected
