@@ -12,7 +12,7 @@
   font-family: 'Fredoka', system-ui, 'Segoe UI', Arial, sans-serif;
 }
 * { box-sizing: border-box; user-select: none; -webkit-user-select: none; }
-html, body { margin: 0; height: 100%; overflow: hidden; background: #08201f; color: var(--cream); }
+html, body { margin: 0; position: fixed; inset: 0; width: 100%; height: 100%; overflow: hidden; touch-action: none; background: #08201f; color: var(--cream); }
 .cnum { font-family: 'Fredoka', system-ui, sans-serif; font-weight: 700; }
 #stage {
   position: absolute; left: 50%; top: 50%; width: 1920px; height: 1080px;
@@ -117,3 +117,17 @@ input[type=range] { width: 260px; accent-color: var(--accent); height: 30px; }
 .peek-card { position: relative; flex: none; }
 .peek-card .card { display: block; width: 100%; filter: drop-shadow(0 6px 0 rgba(0,0,0,.4)); }
 .peek-top { position: absolute; top: -22px; left: 50%; transform: translateX(-50%); font-weight: 700; font-size: 20px; background: var(--gold); color: var(--navy); border: 3px solid var(--navy); border-radius: 12px; padding: 0 10px; }
+
+/* ---- fluid layout (touch devices): three rows that flow to the screen; --cs scales card size ---- */
+#opps { display: contents; }
+body.fluid #stage { left: 0; top: 0; }
+body.fluid #game { display: flex; flex-direction: column; align-items: center; padding: 30px 52px 44px; gap: 8px; }
+body.fluid #opps { display: flex; flex: none; flex-wrap: wrap; justify-content: center; gap: 10px 22px; zoom: var(--cs, 1); }
+body.fluid .seat { position: relative; left: auto; top: auto; flex: none; }
+body.fluid #center { position: relative; left: auto; top: auto; width: auto; height: auto; flex: 1 0 auto; padding-top: 34px; zoom: var(--cs, 1); }
+body.fluid .center-label { top: 0; }
+body.fluid .banner { position: static; transform: none; flex: none; margin: 0; font-size: 26px; padding: 2px 24px; }
+body.fluid #tray { position: relative; left: auto; right: auto; bottom: auto; height: auto; flex: none; display: flex; align-items: flex-end; gap: 26px; margin-top: 18px; zoom: var(--cs, 1); }
+body.fluid .tray-left { position: relative; flex: none; }
+body.fluid .hand { position: static; flex: none; }
+body.fluid .side-actions { position: static; flex: none; }

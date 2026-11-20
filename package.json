@@ -14,9 +14,15 @@
     "test:sim": "vitest run tests/sim",
     "test:e2e": "npm run build && playwright test",
     "dist:mac": "npm run build && electron-builder --mac --universal --publish never",
-    "dist:win": "npm run build && electron-builder --win --publish never"
+    "dist:win": "npm run build && electron-builder --win --publish never",
+    "build:web": "vite build --config vite.android.config.ts",
+    "android:sync": "npm run build:web && cap sync android",
+    "android:debug": "npm run android:sync && cd android && ./gradlew assembleDebug",
+    "android:release": "npm run android:sync && cd android && ./gradlew assembleRelease"
   },
   "devDependencies": {
+    "@capacitor/android": "^8.6.0",
+    "@capacitor/cli": "^8.6.0",
     "@playwright/test": "1.64",
     "@types/node": "^26.6.6",
     "electron": "^45.2.0",
@@ -27,6 +33,7 @@
     "vitest": "^5.0.5"
   },
   "dependencies": {
+    "@capacitor/core": "^8.6.0",
     "@fontsource/fredoka": "^5.3.0",
     "gsap": "3.15"
   }

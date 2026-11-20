@@ -61,6 +61,13 @@ export class SoundManager implements SoundSink {
     this.apply()
   }
 
+  /** Suspend or resume the whole audio context (app backgrounded). */
+  setSuspended(on: boolean): void {
+    if (!this.ctx) return
+    if (on) void this.ctx.suspend()
+    else void this.ctx.resume()
+  }
+
   startMusic(): void {
     this.music?.start()
   }

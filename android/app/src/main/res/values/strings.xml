@@ -1,0 +1,7 @@
+<?xml version='1.0' encoding='utf-8'?>
+<resources>
+    <string name="app_name">Skip-Bo</string>
+    <string name="title_activity_main">Skip-Bo</string>
+    <string name="package_name">org.thepearsonfamily.skipbo</string>
+    <string name="custom_url_scheme">org.thepearsonfamily.skipbo</string>
+</resources>

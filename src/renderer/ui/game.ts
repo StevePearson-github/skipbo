@@ -247,9 +247,11 @@ export class GameController {
     const me = this.state.players[this.state.current]!
     if (hand && hand.closest('.tray-hand')) {
       const index = Number(hand.dataset.hand)
+      if (this.isDoubleTap(`hand:${index}`) && this.autoPlay({ src: 'hand', index }, hand)) return
       this.select(this.same({ src: 'hand', index }) ? null : { src: 'hand', index })
     } else if (stock && stock.closest('.tray-left')) {
       if (!me.stock.length) return
+      if (this.isDoubleTap('stock') && this.autoPlay({ src: 'stock' }, stock as HTMLElement)) return
       this.select(this.same({ src: 'stock' }) ? null : { src: 'stock' })
     } else if (disc && disc.closest('.tray-left')) {
       const pile = Number(disc.dataset.discard)
@@ -258,7 +260,10 @@ export class GameController {
       else if (sel) {
         if (this.same({ src: 'discard', pile })) this.select(null)
         else this.invalid(disc)
-      } else if (me.discards[pile]!.length) this.select({ src: 'discard', pile })
+      } else if (me.discards[pile]!.length) {
+        if (this.isDoubleTap(`discard:${pile}`) && this.autoPlay({ src: 'discard', pile }, disc)) return
+        this.select({ src: 'discard', pile })
+      }
     } else if (build) {
       const to = Number(build.dataset.build)
       const sel = this.selected
@@ -267,6 +272,30 @@ export class GameController {
       if (card !== undefined && canPlayCard(this.state, card, to)) void this.perform({ type: 'play', to, ...sel } as Action)
       else this.invalid(build)
     }
+  }
+
+  private lastTap = { key: '', at: 0 }
+
+  /** True when the same card was clicked twice in quick succession. */
+  private isDoubleTap(key: string): boolean {
+    const now = Date.now()
+    const dbl = this.lastTap.key === key && now - this.lastTap.at < 400
+    this.lastTap = dbl ? { key: '', at: 0 } : { key, at: now }
+    return dbl
+  }
+
+  /** Double-click: play the card on the first building pile that accepts it. Returns false if it was not handled. */
+  private autoPlay(from: PlaySource, el: HTMLElement): boolean {
+    const card = cardAt(this.state, from)
+    if (card === undefined) return false
+    const to = this.state.build.findIndex((_, i) => canPlayCard(this.state, card, i))
+    if (to < 0) {
+      this.invalid(el)
+      return true
+    }
+    this.selected = null
+    void this.perform({ type: 'play', to, ...from } as Action)
+    return true
   }
 
   /** Right-click a discard pile (yours or an opponent's) to see every card in it. */
@@ -425,6 +454,7 @@ export class GameController {
       4: [[24, 330], [440, 30], [1080, 30], [1496, 330]],
       5: [[24, 330], [340, 30], [760, 30], [1180, 30], [1496, 330]],
     }
+    const fluid = document.body.classList.contains('fluid')
     const seatsHtml = opps
       .map((pi, k) => {
         const p = s.players[pi]!
@@ -432,7 +462,7 @@ export class GameController {
         const st = this.seats[pi] as Seat
         const discs = p.discards.map((d, di) => this.pile(d, 62, { cascade: 12, maxShow: 4, data: `data-peek="${pi}:${di}"` })).join('')
         const stock = this.pile(p.stock, 62, { extra: 'stockp' }).replace('</div></div>', `</div><span class="badge stock">${p.stock.length}</span></div>`)
-        return `<div class="seat" style="left:${x}px;top:${y}px"><div class="name"><span style="width:18px;height:18px;border-radius:50%;background:${SEAT_COLORS[pi]};border:2px solid #1c2a4a;display:inline-block"></span>${esc(st.name)}${st.kind === 'cpu' ? ' 🤖' : ''}</div><span class="meta">✋ ${p.hand.length}</span><div class="row-cards">${stock}<div style="width:6px"></div>${discs}</div></div>`
+        return `<div class="seat" ${fluid ? '' : `style="left:${x}px;top:${y}px"`}><div class="name"><span style="width:18px;height:18px;border-radius:50%;background:${SEAT_COLORS[pi]};border:2px solid #1c2a4a;display:inline-block"></span>${esc(st.name)}${st.kind === 'cpu' ? ' 🤖' : ''}</div><span class="meta">✋ ${p.hand.length}</span><div class="row-cards">${stock}<div style="width:6px"></div>${discs}</div></div>`
       })
       .join('')
 
@@ -471,7 +501,7 @@ export class GameController {
     this.el.innerHTML = `<div class="felt-rim"></div>
       ${board ? `<div class="scoreboard">${this.opts.target ? `First to ${this.opts.target}<br>` : ''}${board}</div>` : ''}
       <div class="hud"><button class="btn small" data-act="settings" aria-label="Sound settings">🔊 Sound</button><button class="btn small red" data-act="menu">Menu</button></div>
-      ${seatsHtml}
+      <div id="opps">${seatsHtml}</div>
       <div id="center"><div class="center-label">BUILD 1 → 12</div>
         <div class="pile" style="width:130px;height:182px;position:relative">${cardBackSvg()}<span class="badge">${drawCount}</span></div>
         <div class="build-wrap">${builds}</div></div>
@@ -556,7 +586,7 @@ export class GameController {
     for (let i = 0; i < 90; i++) {
       const p = document.createElement('div')
       p.className = 'confetti'
-      p.style.cssText = `left:${Math.random() * 1900}px;top:-30px;background:${colors[i % colors.length]}`
+      p.style.cssText = `left:${Math.random() * (this.root.clientWidth || 1900)}px;top:-30px;background:${colors[i % colors.length]}`
       this.root.appendChild(p)
       gsap.to(p, { y: 1150, x: (Math.random() - 0.5) * 300, rotation: Math.random() * 900, duration: 2.5 + Math.random() * 2, delay: Math.random() * 1.2, ease: 'none', repeat: -1, repeatDelay: 0 })
     }

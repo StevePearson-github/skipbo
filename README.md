@@ -39,6 +39,11 @@ Requires Node 22+ (developed on Node 24).
 - `npm run dist:mac` universal DMG into `dist/` (unsigned)
 - `npm run dist:win` Windows installer; build on Windows (see `.github/workflows/build.yml`)
 
+## Android
+The same game runs on Android (landscape, full screen) as a [Capacitor](https://capacitorjs.com) wrapper around the web renderer. Tap to select and play; long-press a discard pile to see every card in it. Needs JDK 21 and the Android SDK (`ANDROID_HOME`).
+- `npm run android:debug` builds `android/app/build/outputs/apk/debug/app-debug.apk` (install with `adb install -r`)
+- `npm run android:release` builds an unsigned release APK; sign it (or use Android Studio's *Generate Signed Bundle*) before distributing
+
 ## Rules implemented
 Mattel rules: 162 cards (12 each of 1-12 plus 18 Skip-Bo wilds), stock of 30 (2-4 players) or 20 (5-6), hand of 5, four shared building piles (1 to 12, then removed and recycled) and four personal discard piles. First to empty their stock wins; optional match scoring (25 + 5 per card left in opponents' stocks, first to 100/250/500).
 
@@ -47,7 +52,7 @@ House rule (Mattel is silent): if the draw pile and completed piles are both emp
 Options: stock size (10-30), match target, pass-the-device screen between human turns, hint, undo within a turn.
 
 ## Layout
-`src/shared/engine` rules, `src/shared/ai` computer players, `src/renderer` UI and audio, `src/main` Electron shell, `tests/` unit, simulation and e2e tests. Research is in `reports/`.
+`src/shared/engine` rules, `src/shared/ai` computer players, `src/renderer` UI and audio, `src/main` Electron shell, `android/` Capacitor project, `tests/` unit, simulation and e2e tests. Research is in `reports/`.
 
 ## License
 The code is released under the [MIT License](LICENSE). Third-party components keep their own licenses: Electron (MIT), GSAP (the [GSAP standard license](https://gsap.com/standard-license/)) and the Fredoka font (SIL Open Font License 1.1).
