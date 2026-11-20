@@ -61,6 +61,7 @@ export class Menu {
         <div class="seats">${seats}</div>
         <div class="row"><label>Stock pile</label><select id="stock"><option value="0" ${o.stockSize === 0 ? 'selected' : ''}>Standard (${auto} cards)</option>${sizes.map((n) => `<option value="${n}" ${o.stockSize === n ? 'selected' : ''}>${n} cards${n === 10 ? ' (quick game)' : ''}</option>`).join('')}</select>
           <label style="width:auto;margin-left:30px">Game</label><select id="target"><option value="0" ${o.target === 0 ? 'selected' : ''}>Single game</option>${[100, 250, 500].map((n) => `<option value="${n}" ${o.target === n ? 'selected' : ''}>First to ${n} pts</option>`).join('')}</select></div>
+        <div class="row"><label>Swap view</label><input type="checkbox" id="swapopt" ${o.swapView !== false ? 'checked' : ''} style="width:30px;height:30px"> <span style="font-size:22px">Show each player's cards at the bottom on their turn <span style="opacity:.7">(off: you stay put; only with one human)</span></span></div>
         <div class="row"><label>Pass screen</label><input type="checkbox" id="passopt" ${o.passScreen ? 'checked' : ''} style="width:30px;height:30px"> <span style="font-size:22px">Hide hands between human turns</span></div>
       </div>
       <div class="menu-buttons" style="margin-top:26px"><button class="btn green" id="play">▶ Play</button><button class="btn" id="rules">How to play</button><button class="btn" id="snd">🔊 Sound</button></div>`
@@ -94,6 +95,7 @@ export class Menu {
     })
     q<HTMLSelectElement>('#stock').onchange = (e) => (this.opts.stockSize = Number((e.target as HTMLSelectElement).value))
     q<HTMLSelectElement>('#target').onchange = (e) => (this.opts.target = Number((e.target as HTMLSelectElement).value))
+    q<HTMLInputElement>('#swapopt').onchange = (e) => (this.opts.swapView = (e.target as HTMLInputElement).checked)
     q<HTMLInputElement>('#passopt').onchange = (e) => (this.opts.passScreen = (e.target as HTMLInputElement).checked)
     q<HTMLButtonElement>('#play').onclick = () => {
       this.env.sound.unlock()

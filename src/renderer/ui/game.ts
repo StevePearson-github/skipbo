@@ -55,6 +55,12 @@ export class GameController {
     root.appendChild(this.el)
   }
 
+  /** Index of the player whose board is drawn in the bottom tray. */
+  private get viewer(): number {
+    if (this.opts.swapView === false && this.humans === 1) return this.seats.findIndex((x) => x.kind === 'human')
+    return this.state.current
+  }
+
   get seats(): Seat[] {
     return this.opts.seats
   }
@@ -145,6 +151,7 @@ export class GameController {
     const card: Card | undefined =
       a.type === 'play' ? cardAt(before, a) : a.type === 'discard' ? player.hand[a.index] : undefined
     this.busy = true
+    this.lastTap = { key: '', at: 0 }
     if (a.type !== 'endTurn' && card !== undefined) await this.fly(a, card)
     if (a.type === 'play' && this.seats[prev]!.kind === 'human') this.history.push(before)
     const next = applyAction(before, a)
@@ -438,10 +445,12 @@ export class GameController {
 
   render(): void {
     const s = this.state
-    const cur = s.current
+    const turn = s.current
+    const cur = this.viewer
     const me = s.players[cur]!
     const seat = this.seats[cur] as Seat
-    const humanTurn = seat.kind === 'human'
+    const humanTurn = this.seats[turn]!.kind === 'human'
+    const ownHand = seat.kind === 'human'
     const sel = this.selected
     const n = s.players.length
     const opps = Array.from({ length: n - 1 }, (_, k) => (cur + 1 + k) % n)
@@ -458,16 +467,16 @@ export class GameController {
         const p = s.players[pi]!
         const [x, y] = (POS[opps.length] as [number, number][])[k] as [number, number]
         const st = this.seats[pi] as Seat
-        const discs = p.discards.map((d, di) => this.pile(d, 62, { cascade: 12, maxShow: 4, data: `data-peek="${pi}:${di}"` })).join('')
-        const stock = this.pile(p.stock, 62, { extra: 'stockp' }).replace('</div></div>', `</div><span class="badge stock">${p.stock.length}</span></div>`)
-        return `<div class="seat" ${fluid ? '' : `style="left:${x}px;top:${y}px"`}><div class="name"><span style="width:18px;height:18px;border-radius:50%;background:${SEAT_COLORS[pi]};border:2px solid #1c2a4a;display:inline-block"></span>${esc(st.name)}${st.kind === 'cpu' ? ' 🤖' : ''}</div><span class="meta">✋ ${p.hand.length}</span><div class="row-cards">${stock}<div style="width:6px"></div>${discs}</div></div>`
+        const discs = p.discards.map((d, di) => this.pile(d, 62, { cascade: 12, maxShow: 4, data: `data-peek="${pi}:${di}" data-seatdisc="${pi}:${di}"` })).join('')
+        const stock = this.pile(p.stock, 62, { extra: 'stockp', data: `data-seatstock="${pi}"` }).replace('</div></div>', `</div><span class="badge stock">${p.stock.length}</span></div>`)
+        return `<div class="seat ${pi === turn ? 'turn' : ''}" data-seat="${pi}" ${fluid ? '' : `style="left:${x}px;top:${y}px"`}><div class="name"><span style="width:18px;height:18px;border-radius:50%;background:${SEAT_COLORS[pi]};border:2px solid #1c2a4a;display:inline-block"></span>${esc(st.name)}${st.kind === 'cpu' ? ' 🤖' : ''}</div><span class="meta">✋ ${p.hand.length}</span><div class="row-cards">${stock}<div style="width:6px"></div>${discs}</div></div>`
       })
       .join('')
 
     const handW = Math.min(150, Math.floor((1000 - (me.hand.length - 1) * 14) / Math.max(1, me.hand.length)))
     const hand = me.hand
       .map((c, i) => {
-        const face = humanTurn ? cardSvg(c) : cardBackSvg()
+        const face = ownHand ? cardSvg(c) : cardBackSvg()
         return `<div class="pile ${humanTurn ? 'selectable' : ''} ${sel && sel.src === 'hand' && sel.index === i ? 'sel' : ''}" data-hand="${i}" style="width:${handW}px">${face}</div>`
       })
       .join('')
@@ -490,7 +499,7 @@ export class GameController {
     }).replace(/<\/div><\/div>$/, `</div><span class="badge stock">${me.stock.length}</span></div>`)
     const builds = s.build.map((_, i) => this.buildPile(i)).join('')
     const drawCount = s.draw.length
-    const banner = s.winner !== null ? '' : humanTurn ? (mustEndTurn(s) ? 'No cards in hand — end your turn' : sel ? 'Now pick a building pile (or a discard pile for a hand card)' : 'Pick a card to play') : `${esc(seat.name)} is thinking…`
+    const banner = s.winner !== null ? '' : humanTurn ? (mustEndTurn(s) ? 'No cards in hand — end your turn' : sel ? 'Now pick a building pile (or a discard pile for a hand card)' : 'Pick a card to play') : `${esc((this.seats[turn] as Seat).name)} is thinking…`
     const board = this.opts.target
       ? this.seats.map((st, i) => `${esc(st.name)}: ${this.scores[i]}`).join('<br>')
       : this.wins.some((w) => w > 0)
@@ -505,7 +514,7 @@ export class GameController {
         <div class="build-wrap">${builds}</div></div>
       <div class="banner" id="banner">${banner}</div>
       <div id="tray">
-        <div class="tray-left turn"><div class="tray-name"><span class="name"><span style="width:20px;height:20px;border-radius:50%;background:${SEAT_COLORS[cur]};border:2px solid #1c2a4a;display:inline-block;margin-right:8px;align-self:center"></span>${esc(seat.name)}${seat.kind === 'cpu' ? ' 🤖' : ''}</span></div>
+        <div class="tray-left ${cur === turn ? 'turn' : ''}"><div class="tray-name"><span class="name"><span style="width:20px;height:20px;border-radius:50%;background:${SEAT_COLORS[cur]};border:2px solid #1c2a4a;display:inline-block;margin-right:8px;align-self:center"></span>${esc(seat.name)}${seat.kind === 'cpu' ? ' 🤖' : ''}</span></div>
           <div class="row-cards">${stockPile}<div style="width:10px"></div>${discards}</div></div>
         <div class="hand tray-hand">${hand}</div>
         <div class="side-actions">
@@ -528,7 +537,18 @@ export class GameController {
     if (!this.env.speed) return
     let from: Element | null = null
     let to: Element | null = null
-    if (a.type === 'play') {
+    const who = this.state.current
+    if (who !== this.viewer) {
+      // an opponent plays straight from its seat at the top of the board
+      const seatEl = this.el.querySelector(`.seat[data-seat="${who}"]`)
+      if (a.type === 'play') {
+        from = a.src === 'stock' ? this.el.querySelector(`[data-seatstock="${who}"]`) : a.src === 'discard' ? this.el.querySelector(`[data-seatdisc="${who}:${a.pile}"]`) : (seatEl?.querySelector('.meta') ?? null)
+        to = this.el.querySelector(`[data-build="${a.to}"]`)
+      } else if (a.type === 'discard') {
+        from = seatEl?.querySelector('.meta') ?? null
+        to = this.el.querySelector(`[data-seatdisc="${who}:${a.pile}"]`)
+      }
+    } else if (a.type === 'play') {
       from = a.src === 'hand' ? this.el.querySelector(`.tray-hand [data-hand="${a.index}"]`) : a.src === 'stock' ? this.el.querySelector('.tray-left [data-stock]') : this.el.querySelector(`.tray-left [data-discard="${a.pile}"]`)
       to = this.el.querySelector(`[data-build="${a.to}"]`)
     } else if (a.type === 'discard') {

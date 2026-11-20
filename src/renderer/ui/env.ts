@@ -15,6 +15,8 @@ export interface SetupOptions {
   target: number
   /** Show a "pass the device" screen between human turns. */
   passScreen: boolean
+  /** Swap the active player's cards into the bottom tray each turn. When false (one human only), the human stays at the bottom. */
+  swapView?: boolean
 }
 
 export interface Env {
@@ -39,6 +41,7 @@ export function defaultSetup(): SetupOptions {
     stockSize: 0,
     target: 0,
     passScreen: true,
+    swapView: true,
   }
 }
 

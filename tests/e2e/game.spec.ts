@@ -302,3 +302,22 @@ test('input is ignored (not applied to a stale screen) while a turn change is in
   })
   expect(ok).toBe(true)
 })
+
+test('with swap view off, the lone human stays at the bottom while the computer plays from its seat', async () => {
+  ctx = await launch({ SKIPBO_QUERY: 'seed=3&fast=1' })
+  const { page } = ctx
+  await page.evaluate(() => window.__skipbo!.startGame({ seats: [{ name: 'Steve', kind: 'human', level: 'medium' }, { name: 'Bot', kind: 'cpu', level: 'hard' }], stockSize: 10, target: 0, passScreen: false, swapView: false } as never))
+  // play until it is the computer's turn, checking the tray never swaps
+  for (let i = 0; i < 40; i++) {
+    const s = await getState(page)
+    if (s.winner !== null) break
+    await expect(page.locator('.tray-name .name')).toContainText('Steve')
+    if (s.current === 1) {
+      await expect(page.locator('.seat[data-seat="1"]')).toHaveClass(/turn/)
+      return
+    }
+    await page.click('.tray-hand [data-hand="0"]')
+    await page.click('.tray-left [data-discard="0"]')
+    await page.waitForTimeout(100)
+  }
+})
