@@ -24,6 +24,11 @@ export function defaultStockSize(playerCount: number): number {
   return playerCount <= 4 ? 30 : 20
 }
 
+/** Largest stock pile the deck can supply for this many players (stock + hands must fit in the deck). */
+export function maxStockSize(playerCount: number, config: GameConfig = DEFAULT_CONFIG): number {
+  return Math.floor(deckSize(config) / playerCount) - config.handSize
+}
+
 export function configFor(playerCount: number, overrides: Partial<GameConfig> = {}): GameConfig {
   return { ...DEFAULT_CONFIG, stockSize: defaultStockSize(playerCount), ...overrides }
 }

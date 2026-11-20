@@ -1,4 +1,5 @@
 import { Difficulty } from '../../shared/ai'
+import { defaultStockSize, maxStockSize } from '../../shared/engine/game'
 import { Env, SEAT_COLORS, SetupOptions, defaultSetup, esc } from './env'
 
 const LEVELS: { v: Difficulty; label: string }[] = [
@@ -49,12 +50,16 @@ export class Menu {
         <select data-level="${i}" ${s.kind === 'human' ? 'disabled style="opacity:.35"' : ''} aria-label="Player ${i + 1} difficulty">${LEVELS.map((l) => `<option value="${l.v}" ${s.level === l.v ? 'selected' : ''}>${l.label}</option>`).join('')}</select></div>`,
       )
       .join('')
-    const auto = this.count <= 4 ? 30 : 20
+    const auto = defaultStockSize(this.count)
+    const maxStock = Math.min(40, maxStockSize(this.count))
+    if (this.opts.stockSize > maxStock) this.opts.stockSize = 0
+    const sizes: number[] = []
+    for (let n = 5; n <= maxStock; n += 5) sizes.push(n)
     this.el.innerHTML = `<h1 class="logo">SKIP-BO</h1><p class="tagline">Race to empty your stock pile!</p>
       <div class="panel" id="setup">
         <div class="row"><label>Players</label>${[2, 3, 4, 5, 6].map((n) => `<button class="chip ${n === this.count ? 'on' : ''}" data-count="${n}" aria-label="${n} players">${n}</button>`).join('')}</div>
         <div class="seats">${seats}</div>
-        <div class="row"><label>Stock pile</label><select id="stock"><option value="0" ${o.stockSize === 0 ? 'selected' : ''}>Standard (${auto} cards)</option>${[10, 15, 20, 25, 30].map((n) => `<option value="${n}" ${o.stockSize === n ? 'selected' : ''}>${n} cards${n === 10 ? ' (quick game)' : ''}</option>`).join('')}</select>
+        <div class="row"><label>Stock pile</label><select id="stock"><option value="0" ${o.stockSize === 0 ? 'selected' : ''}>Standard (${auto} cards)</option>${sizes.map((n) => `<option value="${n}" ${o.stockSize === n ? 'selected' : ''}>${n} cards${n === 10 ? ' (quick game)' : ''}</option>`).join('')}</select>
           <label style="width:auto;margin-left:30px">Game</label><select id="target"><option value="0" ${o.target === 0 ? 'selected' : ''}>Single game</option>${[100, 250, 500].map((n) => `<option value="${n}" ${o.target === n ? 'selected' : ''}>First to ${n} pts</option>`).join('')}</select></div>
         <div class="row"><label>Pass screen</label><input type="checkbox" id="passopt" ${o.passScreen ? 'checked' : ''} style="width:30px;height:30px"> <span style="font-size:22px">Hide hands between human turns</span></div>
       </div>
