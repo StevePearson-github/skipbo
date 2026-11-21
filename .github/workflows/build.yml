@@ -52,9 +52,32 @@ jobs:
         with:
           name: skipbo-mac-standalone-zip
           path: dist/*.zip
+  android:
+    runs-on: ubuntu-latest
+    needs: test
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with: { node-version: 24 }
+      - uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: 21
+      - run: npm ci
+      # builds the web renderer, syncs it into the Capacitor project and runs Gradle assembleDebug
+      # (the debug APK is signed with Android's debug key, so it installs without a release keystore)
+      - run: npm run android:debug
+      - name: Name the APK
+        run: |
+          mkdir -p dist
+          cp android/app/build/outputs/apk/debug/app-debug.apk "dist/Skip-Bo-$(node -p "require('./package.json').version")-android.apk"
+      - uses: actions/upload-artifact@v4
+        with:
+          name: skipbo-android-apk
+          path: dist/Skip-Bo-*-android.apk
   release:
     if: startsWith(github.ref, 'refs/tags/v')
-    needs: [windows, mac]
+    needs: [windows, mac, android]
     runs-on: ubuntu-latest
     permissions:
       contents: write
@@ -69,12 +92,13 @@ jobs:
           GH_TOKEN: ${{ github.token }}
         run: |
           cat > notes.md <<'NOTES'
-          Cartoony Skip-Bo for Windows and macOS: 2-6 players on one screen, human or computer (Easy / Medium / Hard), synthesized sound and music.
+          Cartoony Skip-Bo for Windows, macOS and Android: 2-6 players on one screen, human or computer (Easy / Medium / Hard), synthesized sound and music.
 
           ## Downloads
           - **Windows, stand-alone (no install):** `Skip-Bo-*-windows-portable.exe`. Just double-click it.
           - **Windows installer:** `Skip-Bo-Setup-*.exe`
           - **macOS:** `Skip-Bo-*-mac-universal.dmg` (Apple Silicon and Intel), or the `.zip` for a stand-alone app
+          - **Android:** `Skip-Bo-*-android.apk` (landscape). Allow installing from your browser/file manager when prompted, then open the APK.
 
           Unofficial fan project, not affiliated with Mattel, Inc. "Skip-Bo" is a trademark of Mattel, Inc.
 
@@ -82,5 +106,6 @@ jobs:
           These builds are not code-signed.
           - **Windows:** if SmartScreen says "Windows protected your PC", click **More info**, then **Run anyway**.
           - **macOS:** right-click the app and choose **Open** the first time.
+          - **Android:** the APK is signed with a debug key, not a Play Store key, so Android asks you to allow installs from unknown sources.
           NOTES
           gh release create "$GITHUB_REF_NAME" artifacts/* --repo "$GITHUB_REPOSITORY" --title "Skip-Bo $GITHUB_REF_NAME" --notes-file notes.md

@@ -28,7 +28,7 @@ The builds are not code-signed, so your OS will warn you the first time:
 - **macOS:** right-click the app and choose **Open**, then confirm. If it is still blocked, run `xattr -dr com.apple.quarantine /Applications/Skip-Bo.app` in Terminal.
 
 **Android**
-- There is no prebuilt APK on the Releases page yet; build one from source (see [Android](#android) below) and install it with `adb install -r`.
+- Download `Skip-Bo-<version>-android.apk` from the Releases page and open it on your device (allow installs from unknown sources when prompted; the APK is signed with a debug key, not a Play Store key). To build it yourself, see [Android](#android) below.
 
 Settings (names, options, volume) are saved per user: `%APPDATA%\Skip-Bo` on Windows, `~/Library/Application Support/Skip-Bo` on macOS.
 
