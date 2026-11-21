@@ -22,6 +22,7 @@ html, body { margin: 0; position: fixed; inset: 0; width: 100%; height: 100%; ov
 #stage::before { content: ''; position: absolute; inset: 0; pointer-events: none;
   background: radial-gradient(ellipse at center, transparent 55%, rgba(0,0,0,.45) 100%); }
 .hidden { display: none !important; }
+.game-paused #game, .game-paused #pass, .game-paused #winner, .game-paused #peek, .game-paused .fly, .game-paused .confetti { display: none !important; }
 .screen { position: absolute; inset: 0; }
 
 /* buttons */

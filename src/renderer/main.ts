@@ -174,13 +174,27 @@ let menu: Menu
 let game: GameController | null = null
 
 function startGame(opts: SetupOptions): void {
+  menu.setResume(null)
   menu.hide()
   game?.destroy()
-  game = new GameController(stage, env, opts, () => {
-    game?.destroy()
-    game = null
-    menu.show()
-  })
+  game = new GameController(
+    stage,
+    env,
+    opts,
+    () => {
+      game?.destroy()
+      game = null
+      menu.setResume(null)
+      menu.show()
+    },
+    () => {
+      const g = game
+      if (!g) return
+      g.pause()
+      menu.setResume((o) => g.resume(o))
+      menu.show()
+    },
+  )
   game.startRound()
   sound.startMusic()
 }

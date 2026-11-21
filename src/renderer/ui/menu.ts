@@ -12,6 +12,7 @@ export class Menu {
   private count = 2
   private opts: SetupOptions
   readonly el: HTMLElement
+  private resumeFn: ((o: SetupOptions) => void) | null = null
 
   constructor(
     private readonly root: HTMLElement,
@@ -26,6 +27,12 @@ export class Menu {
     this.el.id = 'menu'
     this.el.className = 'screen'
     root.appendChild(this.el)
+    this.render()
+  }
+
+  /** Offer a "Resume game" button (pass null to remove it). */
+  setResume(fn: ((o: SetupOptions) => void) | null): void {
+    this.resumeFn = fn
     this.render()
   }
 
@@ -64,7 +71,7 @@ export class Menu {
         <div class="row"><label>Swap view</label><input type="checkbox" id="swapopt" ${o.swapView !== false ? 'checked' : ''} style="width:30px;height:30px"> <span style="font-size:22px">Show each player's cards at the bottom on their turn <span style="opacity:.7">(off: you stay put; only with one human)</span></span></div>
         <div class="row"><label>Pass screen</label><input type="checkbox" id="passopt" ${o.passScreen ? 'checked' : ''} style="width:30px;height:30px"> <span style="font-size:22px">Hide hands between human turns</span></div>
       </div>
-      <div class="menu-buttons" style="margin-top:26px"><button class="btn green" id="play">▶ Play</button><button class="btn" id="rules">How to play</button><button class="btn" id="snd">🔊 Sound</button></div>`
+      <div class="menu-buttons" style="margin-top:26px">${this.resumeFn ? '<button class="btn green" id="resume">▶ Resume game</button>' : ''}<button class="btn ${this.resumeFn ? '' : 'green'}" id="play">${this.resumeFn ? 'New game' : '▶ Play'}</button><button class="btn" id="rules">How to play</button><button class="btn" id="snd">🔊 Sound</button></div>`
     this.bind()
   }
 
@@ -97,6 +104,18 @@ export class Menu {
     q<HTMLSelectElement>('#target').onchange = (e) => (this.opts.target = Number((e.target as HTMLSelectElement).value))
     q<HTMLInputElement>('#swapopt').onchange = (e) => (this.opts.swapView = (e.target as HTMLInputElement).checked)
     q<HTMLInputElement>('#passopt').onchange = (e) => (this.opts.passScreen = (e.target as HTMLInputElement).checked)
+    if (this.resumeFn) {
+      const resume = this.resumeFn
+      q<HTMLButtonElement>('#resume').onclick = () => {
+        this.env.sound.play('click')
+        const v = this.value()
+        this.env.save({ setup: { ...v, count: this.count } })
+        this.resumeFn = null
+        this.hide()
+        this.render()
+        resume(v)
+      }
+    }
     q<HTMLButtonElement>('#play').onclick = () => {
       this.env.sound.unlock()
       this.env.sound.play('click')

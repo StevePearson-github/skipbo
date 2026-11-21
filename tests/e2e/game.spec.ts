@@ -321,3 +321,23 @@ test('with swap view off, the lone human stays at the bottom while the computer 
     await page.waitForTimeout(100)
   }
 })
+
+test('main menu mid-game keeps the game, applies option changes and resumes', async () => {
+  ctx = await launch({ SKIPBO_QUERY: 'seed=5&fast=1' })
+  const { page } = ctx
+  await startGame(page, HUMAN_CPU)
+  await page.click('.tray-hand [data-hand="0"]')
+  await page.click('.tray-left [data-discard="0"]')
+  await page.waitForFunction(() => window.__skipbo!.game()!.state.current === 0)
+  const before = JSON.stringify((await getState(page)).players)
+  await page.click('[data-act="menu"]')
+  await page.click('#pause')
+  await expect(page.locator('#menu')).toBeVisible()
+  await expect(page.locator('#game')).toBeHidden()
+  await page.uncheck('#swapopt')
+  await page.click('#resume')
+  await expect(page.locator('#game')).toBeVisible()
+  await expect(page.locator('#menu')).toBeHidden()
+  expect(JSON.stringify((await getState(page)).players)).toBe(before)
+  await expect(page.locator('.tray-name .name')).toContainText('Steve')
+})

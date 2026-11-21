@@ -43,6 +43,7 @@ export class GameController {
     private readonly env: Env,
     private readonly opts: SetupOptions,
     private readonly onExit: () => void,
+    private readonly onPause: () => void = onExit,
   ) {
     this.humans = opts.seats.filter((s) => s.kind === 'human').length
     this.scores = opts.seats.map(() => 0)
@@ -68,6 +69,8 @@ export class GameController {
   destroy(): void {
     this.run++
     clearTimeout(this.hintTimer)
+    this.paused = false
+    this.root.classList.remove('game-paused')
     this.el.remove()
     this.root.querySelectorAll('.overlay,.fly,.confetti').forEach((n) => n.remove())
   }
@@ -139,8 +142,28 @@ export class GameController {
     }
   }
 
-  private wait(ms: number): Promise<void> {
-    return this.env.speed ? sleep(ms / this.env.speed) : Promise.resolve()
+  private paused = false
+
+  /** Hide the board and freeze computer turns while the player visits the main menu. */
+  pause(): void {
+    this.paused = true
+    this.root.classList.add('game-paused')
+  }
+
+  /** Come back from the menu, applying any display options that changed. */
+  resume(o: Pick<SetupOptions, 'swapView' | 'passScreen'>): void {
+    this.opts.swapView = o.swapView
+    this.opts.passScreen = o.passScreen
+    this.paused = false
+    this.root.classList.remove('game-paused')
+    this.selected = null
+    this.render()
+  }
+
+  private async wait(ms: number): Promise<void> {
+    while (this.paused) await sleep(100)
+    if (this.env.speed) await sleep(ms / this.env.speed)
+    while (this.paused) await sleep(100)
   }
 
   /** Apply one action with animation and sound. */
@@ -400,9 +423,13 @@ export class GameController {
   private confirmExit(): void {
     const o = document.createElement('div')
     o.className = 'overlay'
-    o.innerHTML = `<h2>Leave game?</h2><p>The current game will be lost.</p><div class="menu-buttons"><button class="btn red" id="yes">Leave</button><button class="btn green" id="no">Keep playing</button></div>`
+    o.innerHTML = `<h2>Game menu</h2><p>Go to the main menu to change options, then pick up right where you left off.</p><div class="menu-buttons"><button class="btn" id="pause">Options / main menu</button><button class="btn red" id="yes">Leave game</button><button class="btn green" id="no">Keep playing</button></div>`
     this.root.appendChild(o)
     ;(o.querySelector('#no') as HTMLButtonElement).onclick = () => o.remove()
+    ;(o.querySelector('#pause') as HTMLButtonElement).onclick = () => {
+      o.remove()
+      this.onPause()
+    }
     ;(o.querySelector('#yes') as HTMLButtonElement).onclick = () => {
       o.remove()
       this.onExit()
