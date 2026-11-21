@@ -1,5 +1,10 @@
 apply plugin: 'com.android.application'
 
+// Keep the app version in lock-step with package.json so every release is a valid upgrade.
+// versionCode = major * 10000 + minor * 100 + patch (1.1.1 -> 10101); bump the version in package.json only.
+def pkgVersion = new groovy.json.JsonSlurper().parse(file('../../package.json')).version as String
+def (vMajor, vMinor, vPatch) = pkgVersion.tokenize('.-').take(3).collect { it as int }
+
 android {
     namespace = "org.thepearsonfamily.skipbo"
     compileSdk = rootProject.ext.compileSdkVersion
@@ -7,8 +12,8 @@ android {
         applicationId "org.thepearsonfamily.skipbo"
         minSdkVersion rootProject.ext.minSdkVersion
         targetSdkVersion rootProject.ext.targetSdkVersion
-        versionCode 1
-        versionName "1.0"
+        versionCode vMajor * 10000 + vMinor * 100 + vPatch
+        versionName pkgVersion
         testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
         aaptOptions {
              // Files and dirs to omit from the packaged assets dir, modified to accommodate modern web apps.
