@@ -1,6 +1,6 @@
 # Skip-Bo
 
-A cartoony desktop Skip-Bo for macOS and Windows (Electron + TypeScript). 2-6 players on one shared screen, any mix of humans and computer players (Easy / Medium / Hard). All art is SVG generated in code and all sound and music is synthesized with Web Audio.
+A cartoony Skip-Bo for macOS, Windows and Android (Electron + Capacitor + TypeScript). 2-6 players on one shared screen, any mix of humans and computer players (Easy / Medium / Hard). All art is SVG generated in code and all sound and music is synthesized with Web Audio.
 
 ![Skip-Bo gameplay: a 3-player game with a wild card on a building pile](docs/screenshot-game.png)
 
@@ -26,6 +26,9 @@ Download the latest build from the [Releases page](https://github.com/StevePears
 The builds are not code-signed, so your OS will warn you the first time:
 - **Windows:** if SmartScreen says "Windows protected your PC", click **More info**, then **Run anyway**.
 - **macOS:** right-click the app and choose **Open**, then confirm. If it is still blocked, run `xattr -dr com.apple.quarantine /Applications/Skip-Bo.app` in Terminal.
+
+**Android**
+- There is no prebuilt APK on the Releases page yet; build one from source (see [Android](#android) below) and install it with `adb install -r`.
 
 Settings (names, options, volume) are saved per user: `%APPDATA%\Skip-Bo` on Windows, `~/Library/Application Support/Skip-Bo` on macOS.
 
